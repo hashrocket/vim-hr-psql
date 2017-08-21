@@ -2,7 +2,6 @@
 " Author: Chris Erin (hashrocket.com)
 " Version: 0.1
 
-
 if exists('g:loaded_vim_hr_psql')
   finish
 endif
@@ -23,7 +22,19 @@ function! s:tableize(str)
   return pluralized_name
 endfunction
 
+" check for rails db name
 let hr_psql_database_name = system("ruby -ryaml -e \"puts YAML.load_file('config/database.yml')['development']['database']\"")
+
+" check for elixir db name
+if empty(hr_psql_database_name)
+  let hr_psql_database_name = system("elixir -e 'name = System.cwd! |> String.split(\"/\") |> Enum.reverse |> hd; db = get_in(Mix.Config.read!(\"config/dev.exs\"), [String.to_atom(name), :\"Elixir.#{String.capitalize(name)}.Repo\", :database]); IO.puts(db)'")
+  let hr_psql_database_name = s:chomp(hr_psql_database_name)
+endif
+
+" if by chance the db has not yet been set, fall back to the $PGDATABASE
+if empty(hr_psql_database_name)
+  let hr_psql_database_name = $PGDATABASE
+endif
 
 let g:hr_psql_database_name = s:chomp(hr_psql_database_name)
 
