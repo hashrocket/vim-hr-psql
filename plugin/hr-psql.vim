@@ -56,7 +56,6 @@ endfunction
 
 command Pgversion :call <SID>ShellPsqlVersionToVim()
 command Pgdatabase :echom g:hr_psql_database_name
-command -nargs=* PgtableWindow :call <SID>PgtableWindow(<f-args>)
-command -nargs=* Pgtable :echom <SID>PsqlTableDefinition(<f-args>)
+command -nargs=* Pgtable :call <SID>PgtableWindow(<f-args>)
 
 nnoremap <leader>d "zyiw:call <SID>PgtableWindow(@z)<cr>
