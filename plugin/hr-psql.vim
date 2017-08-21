@@ -15,12 +15,9 @@ endfunction
 function! s:tableize(str)
   let underscored_name = substitute(a:str, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
   let lower_cased = substitute(underscored_name, '\(\<\u\l\+\|\l\+\)', '\l\1', 'g')
-  echo lower_cased
   if lower_cased =~ 's$'
-    echo 'not pluralizing'
     let pluralized_name = lower_cased
   else
-    echo 'pluralizing'
     let pluralized_name = lower_cased . 's'
   endif
   return pluralized_name
