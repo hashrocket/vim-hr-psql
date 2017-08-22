@@ -8,6 +8,12 @@
 Move the cursor over a table name word (Thing, thing, things) and type `<leader>d` to view a
 the table definition as seen in `psql` in a scratch window.
 
+To override the default mapping, use the following command:
+
+``` vimscript
+nmap <Leader>db  <Plug>hr_psql_pg_table_window
+```
+
 ## Installation
 
 To install `hr-psql.vim`, use your favorite Vim plugin manager (e.g.
