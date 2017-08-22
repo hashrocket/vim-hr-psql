@@ -69,4 +69,7 @@ command Pgversion :call <SID>ShellPsqlVersionToVim()
 command Pgdatabase :echom g:hr_psql_database_name
 command -nargs=* Pgtable :call <SID>PgtableWindow(<f-args>)
 
-nnoremap <leader>d "pyiw:call <SID>PgtableWindow(@p)<cr>
+if !hasmapto('<Plug>hr_psql_pg_table_window')
+  map <Leader>d  <Plug>hr_psql_pg_table_window
+endif
+nmap <Plug>hr_psql_pg_table_window  "pyiw:call <SID>PgtableWindow(@p)<cr>
