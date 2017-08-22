@@ -22,7 +22,7 @@ let hr_psql_database_name = system("ruby -ryaml -rerb -e \"puts YAML.load(ERB.ne
 
 " check for elixir db name
 if empty(hr_psql_database_name)
-  let hr_psql_database_name = system("elixir -e 'name = System.cwd! |> String.split(\"/\") |> Enum.reverse |> hd; db = get_in(Mix.Config.read!(\"config/dev.exs\"), [String.to_atom(name), :\"Elixir.#{String.capitalize(name)}.Repo\", :database]); IO.puts(db)'")
+  let hr_psql_database_name = system("elixir -e 'name = System.cwd! |> String.split(\"/\") |> Enum.reverse |> hd; db = get_in(Mix.Config.read!(\"config/dev.exs\"), [String.to_atom(name), :\"Elixir.#{Macro.camelize(name)}.Repo\", :database]); IO.puts(db)'")
   let hr_psql_database_name = s:chomp(hr_psql_database_name)
 endif
 
