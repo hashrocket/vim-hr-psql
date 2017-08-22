@@ -14,12 +14,7 @@ endfunction
 function! s:tableize(str)
   let underscored_name = substitute(a:str, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
   let lower_cased = substitute(underscored_name, '\(\<\u\l\+\|\l\+\)', '\l\1', 'g')
-  if lower_cased =~ 's$'
-    let pluralized_name = lower_cased
-  else
-    let pluralized_name = lower_cased . 's'
-  endif
-  return pluralized_name
+  return lower_cased
 endfunction
 
 " check for rails db name
@@ -45,7 +40,11 @@ function! s:ShellPsqlVersionToVim()
 endfunction
 
 function! s:PsqlTableDefinition(tablename)
-  let command='psql ' . g:hr_psql_database_name . ' -c"\d ' . s:tableize(a:tablename) . '"'
+  let findTableSql = "SELECT n.nspname || '.' || c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind in ('r', 'v') AND c.relname ~ '" . a:tablename . "' AND pg_catalog.pg_table_is_visible(c.oid) ORDER BY c.relkind ASC limit 1;"
+  let findTableCommand='psql ' . g:hr_psql_database_name . ' -t -c"' . findTableSql . '"'
+  let tableName=s:chomp(system(findTableCommand))
+
+  let command='psql ' . g:hr_psql_database_name . ' -c"\d ' . tableName . '"'
   let command= s:chomp(command)
   return s:chomp(system(command))
 endfunction
