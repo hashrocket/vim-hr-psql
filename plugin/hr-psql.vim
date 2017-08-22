@@ -23,7 +23,7 @@ function! s:tableize(str)
 endfunction
 
 " check for rails db name
-let hr_psql_database_name = system("ruby -ryaml -e \"puts YAML.load_file('config/database.yml')['development']['database']\"")
+let hr_psql_database_name = system("ruby -ryaml -rerb -e \"puts YAML.load(ERB.new(File.read('config/database.yml')).result)['development']['database']\"")
 
 " check for elixir db name
 if empty(hr_psql_database_name)
