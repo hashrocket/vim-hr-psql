@@ -17,24 +17,29 @@ function! s:tableize(str)
   return lower_cased
 endfunction
 
-let hr_psql_database_name = ''
-" check for rails db name
-if executable('ruby')
-  let hr_psql_database_name = system("ruby -ryaml -rerb -e \"puts YAML.load(ERB.new(File.read('config/database.yml')).result)['development']['database']\"")
-endif
+function! s:LoadDatabase()
+  let hr_psql_database_name = ''
 
-" check for elixir db name
-if empty(hr_psql_database_name) && executable('elixir')
-  let hr_psql_database_name = system("elixir -e 'name = System.cwd! |> String.split(\"/\") |> Enum.reverse |> hd; db = get_in(Mix.Config.read!(\"config/dev.exs\"), [String.to_atom(name), :\"Elixir.#{Macro.camelize(name)}.Repo\", :database]); IO.puts(db)'")
-  let hr_psql_database_name = s:chomp(hr_psql_database_name)
-endif
+  " check for rails db name
+  if executable('ruby') && filereadable('config/database.yml')
+    let hr_psql_database_name = system("ruby -ryaml -rerb -e \"puts YAML.load(ERB.new(File.read('config/database.yml')).result)['development']['database']\"")
+  endif
 
-" if by chance the db has not yet been set, fall back to the $PGDATABASE
-if empty(hr_psql_database_name)
-  let hr_psql_database_name = $PGDATABASE
-endif
+  " check for elixir db name
+  if empty(hr_psql_database_name) && executable('elixir') && filereadable('config/dev.exs')
+    let hr_psql_database_name = system("elixir -e 'name = System.cwd! |> String.split(\"/\") |> Enum.reverse |> hd; db = get_in(Mix.Config.read!(\"config/dev.exs\"), [String.to_atom(name), :\"Elixir.#{Macro.camelize(name)}.Repo\", :database]); IO.puts(db)'")
+    let hr_psql_database_name = s:chomp(hr_psql_database_name)
+  endif
 
-let g:hr_psql_database_name = s:chomp(hr_psql_database_name)
+  " if by chance the db has not yet been set, fall back to the $PGDATABASE
+  if empty(hr_psql_database_name)
+    let hr_psql_database_name = $PGDATABASE
+  endif
+
+  let g:hr_psql_database_name = s:chomp(hr_psql_database_name)
+endfunction
+
+call s:LoadDatabase()
 
 function! s:ShellPsqlVersionToVim()
   let command='psql ' . g:hr_psql_database_name . ' -X -q -t -c"select version();"'
@@ -68,6 +73,7 @@ function! s:PgtableWindow(tablename)
 endfunction
 
 command Pgversion :call <SID>ShellPsqlVersionToVim()
+command Pgreload :call <SID>LoadDatabase()
 command Pgdatabase :echom g:hr_psql_database_name
 command -nargs=* Pgtable :call <SID>PgtableWindow(<f-args>)
 
