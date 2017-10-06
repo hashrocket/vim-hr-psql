@@ -48,7 +48,7 @@ function! s:ShellPsqlVersionToVim()
 endfunction
 
 function! s:PsqlTableDefinition(tablename)
-  let findTableSql = "SELECT n.nspname || '.' || c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind in ('r', 'v') AND c.relname ~ '" . a:tablename . "' AND pg_catalog.pg_table_is_visible(c.oid) ORDER BY c.relkind ASC limit 1;"
+  let findTableSql = "SELECT n.nspname || '.' || c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind in ('r', 'v') AND c.relname ~ '" . a:tablename . "' AND pg_catalog.pg_table_is_visible(c.oid) ORDER BY c.relkind, length(c.relname) ASC limit 1;"
   let findTableCommand='psql ' . g:hr_psql_database_name . ' -X -q -t -c"' . findTableSql . '"'
   let tableName=s:chomp(system(findTableCommand))
 
