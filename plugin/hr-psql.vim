@@ -70,6 +70,7 @@ function! s:PgtableWindow(tablename)
   let l:window_size=line('$')
   execute('resize ' . l:window_size)
   setlocal bt=nofile bh=hide noswf ro
+  set ft=psql
 endfunction
 
 command Pgversion :call <SID>ShellPsqlVersionToVim()
