@@ -39,7 +39,15 @@ function! s:LoadDatabase()
   let g:hr_psql_database_name = s:chomp(hr_psql_database_name)
 endfunction
 
+function! s:PopulateTableNames()
+  let command='psql ' . g:hr_psql_database_name . ' -X -q -t -c"SELECT c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind = ''r'' AND n.nspname <> ''pg_catalog'' AND n.nspname <> ''information_schema'' AND n.nspname !~ ''^pg_toast'' AND pg_catalog.pg_table_is_visible(c.oid) ORDER BY 1;"'
+
+  let command= s:chomp(command)
+  let g:table_names=split(s:chomp(system(command)))
+endfunction
+
 call s:LoadDatabase()
+call s:PopulateTableNames()
 
 function! s:ShellPsqlVersionToVim()
   let command='psql ' . g:hr_psql_database_name . ' -X -q -t -c"select version();"'
@@ -73,10 +81,14 @@ function! s:PgtableWindow(tablename)
   set ft=psql
 endfunction
 
+function! s:complete_table_names(arg_lead, cmd_line, cursor_pos)
+  return filter(copy(g:table_names), 'v:val =~ "^'.a:arg_lead.'"')
+endfunction
+
 command Pgversion :call <SID>ShellPsqlVersionToVim()
 command Pgreload :call <SID>LoadDatabase()
 command Pgdatabase :echom g:hr_psql_database_name
-command -nargs=* Pgtable :call <SID>PgtableWindow(<f-args>)
+command -nargs=* -complete=customlist,s:complete_table_names Pgtable :call <SID>PgtableWindow(<f-args>)
 
 if !hasmapto('<Plug>hr_psql_pg_table_window')
   map <Leader>d  <Plug>hr_psql_pg_table_window
