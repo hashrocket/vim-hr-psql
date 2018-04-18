@@ -26,7 +26,6 @@ function CatchError(channel, msg)
 endfunction
 
 function! s:LoadDatabase()
-  echo "loading database"
   let hr_psql_database_name = ''
 
   " check for rails db name
