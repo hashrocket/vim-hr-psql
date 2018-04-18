@@ -49,7 +49,9 @@ function! s:PopulateTableNames()
   let g:table_names=split(s:chomp(system(command)))
 endfunction
 
-call s:LoadDatabase()
+if !has('nvim')
+  call s:LoadDatabase()
+endif
 "call s:PopulateTableNames()
 
 function! s:ShellPsqlVersionToVim()
