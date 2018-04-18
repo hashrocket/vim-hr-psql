@@ -17,12 +17,23 @@ function! s:tableize(str)
   return lower_cased
 endfunction
 
+function! SetDatabase(channel, msg)
+  let g:hr_psql_database_name = s:chomp(a:msg)
+endfunction
+
+function CatchError(channel, msg)
+  echo a:msg
+endfunction
+
 function! s:LoadDatabase()
+  echo "loading database"
   let hr_psql_database_name = ''
 
   " check for rails db name
   if executable('ruby') && filereadable('config/database.yml')
-    let hr_psql_database_name = system("ruby -ryaml -rerb -e \"puts YAML.load(ERB.new(File.read('config/database.yml')).result)['development']['database']\"")
+    let command_list = ["ruby", "-ryaml", "-rerb", "-e", "puts YAML.load(ERB.new(File.read('config/database.yml')).result)['development']['database']"]
+
+    call job_start(command_list, {"out_cb": "SetDatabase", "err_cb": "CatchError"})
   endif
 
   " check for elixir db name
@@ -30,13 +41,6 @@ function! s:LoadDatabase()
     let hr_psql_database_name = system("elixir -e 'name = System.cwd! |> String.split(\"/\") |> Enum.reverse |> hd; db = get_in(Mix.Config.read!(\"config/dev.exs\"), [String.to_atom(name), :\"Elixir.#{Macro.camelize(name)}.Repo\", :database]); IO.puts(db)'")
     let hr_psql_database_name = s:chomp(hr_psql_database_name)
   endif
-
-  " if by chance the db has not yet been set, fall back to the $PGDATABASE
-  if empty(hr_psql_database_name)
-    let hr_psql_database_name = $PGDATABASE
-  endif
-
-  let g:hr_psql_database_name = s:chomp(hr_psql_database_name)
 endfunction
 
 function! s:PopulateTableNames()
