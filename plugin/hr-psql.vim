@@ -51,7 +51,7 @@ function! s:PopulateTableNames()
 endfunction
 
 call s:LoadDatabase()
-call s:PopulateTableNames()
+"call s:PopulateTableNames()
 
 function! s:ShellPsqlVersionToVim()
   let command='psql ' . g:hr_psql_database_name . ' -X -q -t -c"select version();"'
